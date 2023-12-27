@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Home Page</title>
+
+        <link
+            rel="stylesheet"
+            href="{{url_for('static', filename = 'styles/style.css')}}" />
+        <link
+            rel="stylesheet"
+            href="{{url_for('static', filename = 'font/font-awesome/css/font-awesome.min.css')}}" />
+    </head>
+    <body>
+        <h1>Kiểu ĐZ</h1>
+        <div class="container">
+            <div class="tool">
+                <div class="train_1">
+                    <h2 style="font-family: Georgia">Sample</h2>
+                    <ul class="img_sample">
+                        <li class="e_img">
+                            <img
+                                class="s_img"
+                                src="{{url_for('static', filename = 'images/taylor_red.jpg')}}"
+                                alt="no founder" />
+                        </li>
+                        <li class="e_img">
+                            <img
+                                class="s_img"
+                                src="{{url_for('static', filename = 'images/taylor_red.jpg')}}"
+                                alt="no founder" />
+                        </li>
+                        <li class="e_img">
+                            <img
+                                class="s_img"
+                                src="{{url_for('static', filename = 'images/taylor_red.jpg')}}"
+                                alt="no founder" />
+                        </li>
+                        <li class="e_img">
+                            <img
+                                class="s_img"
+                                src="{{url_for('static', filename = 'images/taylor_red.jpg')}}"
+                                alt="no founder" />
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="train_1">
+                    <h2 style="font-family: Georgia">Upload Files</h2>
+                    <div class="train_2">
+                        <div style="margin: 0 20px auto auto; width: 80%">
+                            <h5
+                                style="
+                                    font-family: Arial, Helvetica, sans-serif;
+                                    text-align: center;
+                                ">
+                                Drop File here or
+                            </h5>
+                        </div>
+
+                        <form method="POST" enctype="multipart/form-data">
+                            {{form.hidden_tag()}} {{form.file()}}
+                            {{form.submit()}}
+                            <input id="fileInput" type="file" hidden="" />
+                            <div class="frame_i">
+                                <label
+                                    class="input_file"
+                                    id="fileInputLabel"
+                                    for="fileInput">
+                                    <i
+                                        style="text-align: center"
+                                        class="fa fa-upload"
+                                        aria-hidden="true"></i>
+                                    <span style="text-align: center"
+                                        >Select File</span
+                                    >
+                                </label>
+                            </div>
+                        </form>
+                        <p style="text-align: center" name="file_name">
+                            Name of files:
+                        </p>
+                        <!-- </form> -->
+                    </div>
+                </div>
+                <div class="train_1">
+                    <h2 style="font-family: Georgia">Paste URL</h2>
+                    <div class="train_2">
+                        <form action="/action_page.php">
+                            <i class="fa fa-link" aria-hidden="true"></i>
+                            <input
+                                class="input-link"
+                                type="text"
+                                placeholder="Paste a link..." />
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="process_img">
+                <img
+                    id="img_prc"
+                    src="{{url_for('static', filename = 'images/taylor_red.jpg')}}"
+                    alt="no founder" />
+            </div>
+
+            <div class="result">
+                <div class="train_1">
+                    <h2 style="font-family: Georgia">Upload Files</h2>
+                    <div class="flex items-center flex-row gap-2">
+                        <p class="font-mono text-xs">0%</p>
+                        <input
+                            type="range"
+                            min="1"
+                            max="99"
+                            value="50"
+                            class="slider"
+                            id="confidenceSlider" />
+                        <p class="font-mono text-xs">100%</p>
+                    </div>
+                </div>
+                <div class="train_1">
+                    <!-- <h2 style="font-family: Georgia">Sample</h2> -->
+                    <pre class="jsonOutput" id="inferenceJson">
+    {
+        "predictions": [
+            {
+            "class": "Taylor",
+            "class_id": 1,
+            "confidence": 3
+            }
+        
+     }
+                    </pre>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
