@@ -40,7 +40,9 @@
                     id="navbarSupportedContent">
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item">
-                            <a class="nav-link project" href="#">Project</a>
+                            <a class="nav-link project active" href="#"
+                                >Project</a
+                            >
                         </li>
                         <li class="nav-item dropdown">
                             <a
@@ -219,7 +221,7 @@
                                 form.file(id="fileInput", class="input_file",
                                 hidden=True) }} {{ form.submit(id="smImg",
                                 class="submit_button", hidden=True) }}
-                                <!-- <input id="fileInput" type="file" hidden="" /> -->
+                                <!-- <input id="fileInput" type="file"U hidden="" /> -->
                                 <div class="frame_i">
                                     <label
                                         class="input_file"
@@ -258,10 +260,14 @@
                             <form>
                                 <i class="fa fa-link" aria-hidden="true"></i>
                                 <input
+                                    id="imageURL"
                                     class="input-link"
                                     type="text"
                                     placeholder="Paste a link..." />
                             </form>
+                            <button class="smI" onclick="downloadImage()">
+                                Download and Display
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -274,8 +280,10 @@
                         src="{{ file_url }}"
                         alt="Uploaded Image" />
                     {% else %}
+
                     <p>No image uploaded yet.</p>
                     {% endif %}
+                    <img id="displayedImage" src="" alt="Downloaded Image" />
                 </div>
 
                 <div class="col-lg-2 result">
@@ -313,6 +321,29 @@
                 </div>
                 <div class="col-lg-1"></div>
             </div>
+        </div>
+
+        <div class="container-ft">
+            <div class="row ct-ft">
+                <div class="col-lg-4 ftx ft1">
+                    <h5>ABOUT COMPANY</h5>
+                    <p>
+                        At vero eos et accusamus et iusto odio dignissimos
+                        ducimus qui blanditiis praesentium voluptatum deleniti
+                        atque corrupti. Blanditiis praesentium voluptatum
+                        deleniti atque corrupti quos dolores et quas molestias.
+                    </p>
+                </div>
+                <div class="col-lg-4 ftx ft2"></div>
+                <div class="col-lg-4 ftx ft3"></div>
+            </div>
+            <div class="ft-text-center">
+                © 2024 Copyright:
+                <a class="text-white" href="https://www.instagram.com/tedvkieu/"
+                    >tedvkieu</a
+                >
+            </div>
+            <!-- Copyright -->
         </div>
     </body>
 </html>

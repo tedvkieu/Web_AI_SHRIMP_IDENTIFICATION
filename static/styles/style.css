@@ -76,6 +76,10 @@
     font-family: Inter, sans-serif;
     text-align: center;
 }
+.active {
+    border-radius: 0.375rem;
+    background-color: rgb(87, 120, 175);
+}
 /*----------------------SlideNav------------------------*/
 .photo {
     max-width: 70%;
@@ -162,6 +166,12 @@ input::file-selector-button {
     height: auto;
     margin: 10px 10%;
 }
+
+#displayedImage {
+    max-width: 80%;
+    height: auto;
+    margin: 10px 10%;
+}
 /*---------------------Input Link-------------------*/
 .input-link {
     max-width: 80%;
@@ -208,7 +218,7 @@ input::file-selector-button {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 25px auto;
+    margin: 20px auto;
     padding: 2px;
     border: 2px solid #ccc;
     border-radius: 5px;
@@ -234,4 +244,22 @@ input::file-selector-button {
 }
 #confidenceSlider {
     margin-top: 0;
+}
+/*---------------------CSS FOOTER--------------*/
+.ct-ft {
+    color: #ccc;
+    background-color: rgb(18, 43, 82);
+}
+.container-ft {
+    margin-top: 50px;
+}
+.ftx {
+    padding: 20px;
+    text-align: center;
+}
+.ft-text-center {
+    text-align: center;
+    color: #ccc;
+    padding: 20px;
+    background-color: rgb(12, 29, 56) !important;
 }
