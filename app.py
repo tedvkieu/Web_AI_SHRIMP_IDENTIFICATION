@@ -1,18 +1,23 @@
-from flask import Flask, redirect, url_for,render_template, send_from_directory,request, send_file,jsonify, session
+from flask import Flask, redirect, url_for,render_template, send_from_directory,request, send_file,jsonify, session, flash
 from flask_wtf import FlaskForm
 from wtforms import FileField, SubmitField
-from werkzeug.utils import secure_filename
-from flask_sqlalchemy import SQLAlchemy
+from wtforms.validators import InputRequired
 from enum import EnumMeta
-from os import path
-import os 
+from werkzeug.utils import secure_filename
 from datetime import timedelta
 from flask.helpers import flash
-from wtforms.validators import InputRequired
-import requests
+from urllib.parse import urlparse
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
 from io import BytesIO
 from PIL import Image
-from urllib.parse import urlparse
+from flask import *
+from os import path
+
+import os 
+import json
+import uuid
+import requests
 
 
 app = Flask(__name__)
@@ -24,64 +29,49 @@ app.permanent_session_lifetime = timedelta(minutes=1)
 
 db = SQLAlchemy(app)
 
+class user(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80))
+    email = db.Column(db.String(120))
+    password = db.Column(db.String(80))
 
-class User(db.Model):
-    user_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    email = db.Column(db.String(100))
 
-    def __init__(self, name, email):
-        self.name = name
-        self.email = email
-
-@app.route('/login', methods =["POST", "GET"])
+@app.route("/login",methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        user_name = request.form["name"]
-        session.permanent=True
-        if user_name:
-            session["user"] = user_name
-            found_user = User.query.filter_by(name = user_name).first()
-            if found_user:
-                session["email"] = found_user.email
-            else:   
-                user = User(user_name, 'temp@gmail.com')
-                db.session.add(user)
-                db.session.commit()
-            flash("created in DB!")
-            flash("you logged in successfully!", "info")
-            return redirect(url_for("user", user = user_name))
-        if "user" in session:
-            name = session["user"]
-            flash("you have already logged in!", "info")
-            return redirect(url_for("user", user = user_name))
+        uname = request.form["uname"]
+        passw = request.form["passw"]
+        login = user.query.filter_by(username=uname, password=passw).first()
+        if login is not None:
+            return redirect(url_for("project"))
+        else:
+            flash("Username or Password does not exist", 'error')
     return render_template("login.html")
 
-@app.route('/user', methods = ["POST", "GET"])
-def user():
-    email = None
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        uname = request.form['uname']
+        mail = request.form['mail']
+        passw = request.form['passw']
 
-    if "user" in session:
-       name = session["user"]
-       if request.method == "POST":
-           if not request.form["email"] and request.form["name"]:
-               User.query.filter_by(name = name).delete()
-               db.session.commit()
-               flash("deleted user!")
-               return redirect(url_for("log_out"))
-           else:
-                email = request.form["email"]
-                session["email"] = email
-                found_user = User.query.filter_by(name = name).first()
-                found_user.email = email
+        # Check if username or email already exists
+        existing_user = user.query.filter((user.username == uname) | (user.email == mail)).first()
+        if existing_user:
+            flash("Username or Email already exists", 'error')
+        else:
+            # Create a new user if username and email are unique
+            new_user = user(username=uname, email=mail, password=passw)
+            db.session.add(new_user)
+            try:
                 db.session.commit()
-                flash("email updated")
-       elif "email" in session:
-           email = session["email"]
-       return render_template("user.html", user = name, email = email)
-    else:
-        flash("you haven't logged in", "info")
-        return redirect(url_for("login"))
+                flash("Account created successfully", 'success')
+                return redirect(url_for("login"))
+                
+            except IntegrityError:
+                db.session.rollback()
+                flash("An error occurred while creating the account", 'error')
+    return render_template("register.html")
 
 class uploadFileForm(FlaskForm):
     file = FileField("File", validators = [InputRequired()])
@@ -91,8 +81,8 @@ class uploadFileForm(FlaskForm):
 def get_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],filename) 
 
-@app.route('/', methods = ['GET', 'POST'])
-def index():
+@app.route('/project', methods = ['GET', 'POST'])
+def project():
    form = uploadFileForm()
    if form.validate_on_submit():
        file = form.file.data
@@ -102,7 +92,11 @@ def index():
        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)), app.config['UPLOAD_FOLDER'], secure_filename(file.filename)))
    else:
         file_url = None    
-   return render_template("index.html", form = form, file_url = file_url)
+   return render_template("project.html", form = form, file_url = file_url)
+
+@app.route('/')
+def index():
+    return render_template("index.html")
 
 @app.route('/user/<name>')
 def hello_user(name):
