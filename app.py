@@ -19,15 +19,20 @@ import json
 import uuid
 import requests
 
+# the "files" directory next to the app.py file
+UPLOAD_FOLDER = 'static/images/img_process'
+#print(UPLOAD_FOLDER)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'supersecretkey'
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///user.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config['UPLOAD_FOLDER'] = 'static/images/img_process'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+#app.config['UPLOAD_FOLDER'] = 'static/images/img_process'
 app.permanent_session_lifetime = timedelta(minutes=1)
 
 db = SQLAlchemy(app)
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif', 'mp4'])
 
 class user(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -35,6 +40,52 @@ class user(db.Model):
     email = db.Column(db.String(120))
     password = db.Column(db.String(80))
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+  
+#---------------------------------------------------------
+@app.route('/project')
+def project(): 
+    return render_template('project.html')
+# def project():
+#    form = uploadFileForm()
+#    if form.validate_on_submit():
+#        file = form.file.data
+       
+#        filename = secure_filename(file.filename)
+#        file_url = url_for('get_file', filename = filename)
+#        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)), app.config['UPLOAD_FOLDER'], secure_filename(file.filename)))
+#    else:
+#         file_url = None    
+#    return render_template("project.html", form = form, file_url = file_url)
+ 
+@app.route('/project', methods=['POST'])
+def upload_file():
+    if 'uploadFile[]' not in request.files:
+        return redirect(request.url)
+    files = request.files.getlist('uploadFile[]')
+    file_names = []
+    for file in files:
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_names.append(filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            msg  = 'File successfully uploaded to /static/uploads!'
+        else:
+            msg  = 'Invalid Uplaod only png, jpg, jpeg, gif'
+    return jsonify({'htmlresponse': render_template('response.html', msg=msg, filenames=file_names)})
+
+ 
+ 
+def _get_files():
+    file_list = os.path.join(UPLOAD_FOLDER, 'files.json')
+    if os.path.exists(file_list):
+        with open(file_list) as fh:
+            return json.load(fh)
+    return {}
+
+    
+#/--------------------------------------------------------
 
 @app.route("/login",methods=["GET", "POST"])
 def login():
@@ -81,34 +132,11 @@ class uploadFileForm(FlaskForm):
 def get_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],filename) 
 
-@app.route('/project', methods = ['GET', 'POST'])
-def project():
-   form = uploadFileForm()
-   if form.validate_on_submit():
-       file = form.file.data
-       
-       filename = secure_filename(file.filename)
-       file_url = url_for('get_file', filename = filename)
-       file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)), app.config['UPLOAD_FOLDER'], secure_filename(file.filename)))
-   else:
-        file_url = None    
-   return render_template("project.html", form = form, file_url = file_url)
 
 @app.route('/')
 def index():
     return render_template("index.html")
 
-@app.route('/user/<name>')
-def hello_user(name):
-    return f"<h1> Hello {name}</h1>"
-
-@app.route('/blog/<int:blog_id>')
-def blog(blog_id):
-    return f"<h1> Blog thu {blog_id}</h1>"
-
-@app.route('/authors/<username>')
-def show_author(username):
-   return render_template('profile.html', username=username)
 
 def get_filename_from_url(url):
     parsed_url = urlparse(url)

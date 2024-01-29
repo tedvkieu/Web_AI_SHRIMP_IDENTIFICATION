@@ -1,0 +1,6 @@
+<p><b>{{ msg }}</b></p>
+{% if filenames %} {% for filename in filenames %}
+<div style="padding: 20px; float: left; text-align: center">
+    <img width="70%" src="/static/images/img_process/{{ filename }}" />
+</div>
+{% endfor %} {% endif %}

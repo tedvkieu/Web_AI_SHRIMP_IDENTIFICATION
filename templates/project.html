@@ -16,7 +16,16 @@
             href="{{url_for('static', filename = 'styles/bootstrap/css/bootstrap.min.css')}}" />
         <link
             rel="stylesheet"
-            href="{{url_for('static', filename = 'styles/bootstrap/css/bootstrap.css')}}" />
+            href="{{url_for('static', filename = 'font/font-awesome/css/font-awesome.min.css')}}" />
+        <!-- <link
+            rel="stylesheet"
+            href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" /> -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <!-- <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script> -->
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
+            integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn"
+            crossorigin="anonymous"></script>
     </head>
     <body>
         <div class="navbarContainer">
@@ -217,43 +226,50 @@
                         <span class="title"
                             >&nbsp;&nbsp;&nbsp;&nbsp;Upload Files</span
                         >
-                        <div class="train_2">
+                        <div class="train_2" style="text-align: center">
                             <span class="title tl2">Drop File Here or</span>
-
-                            <form method="POST" enctype="multipart/form-data">
-                                {{form.hidden_tag()}} {{
-                                form.file(id="fileInput", class="input_file",
-                                hidden=True) }} {{ form.submit(id="smImg",
-                                class="submit_button", hidden=True) }}
-                                <!-- <input id="fileInput" type="file"U hidden="" /> -->
-                                <div class="frame_i">
-                                    <label
-                                        class="input_file"
-                                        id="fileInputLabel"
-                                        for="fileInput">
-                                        <i
-                                            style="text-align: center"
-                                            class="fa fa-upload"
-                                            aria-hidden="true"></i>
-                                        <span
-                                            class="spbt text_bt"
-                                            for="fileInput"
-                                            >Select File</span
-                                        >
+                            <form
+                                id="uploadImage"
+                                method="post"
+                                action="/project"
+                                enctype="multipart/form-data">
+                                <div class="form-group">
+                                    <input
+                                        type="file"
+                                        name="uploadFile[]"
+                                        multiple="true"
+                                        id="uploadFile"
+                                        accept=".jpg, .png, .mp4"
+                                        hidden="True" />
+                                    <label for="uploadFile" class="input_file">
+                                        Custom Upload
                                     </label>
                                 </div>
-                                <button class="smI" for="smImg">Submit</button>
-
-                                {% if file_url %}
-                                <p class="text_bt">
-                                    File name: {{ file_url.split('/')[-1] }}
-                                </p>
-                                {% else %}
-                                <p>No image uploaded yet.</p>
-                                {% endif %}
+                                <div class="form-group">
+                                    <input
+                                        type="submit"
+                                        id="uploadSubmit"
+                                        value="Upload"
+                                        class="btn btn-info" />
+                                </div>
                             </form>
-
-                            <!-- </form> -->
+                            <!-- <div class="frame_i">
+                                <label
+                                    class="input_file"
+                                    id="fileInputLabel"
+                                    for="uploadFileip">
+                                    <i
+                                        style="text-align: center"
+                                        class="fa fa-upload"
+                                        aria-hidden="true"></i>
+                                    <span class="spbt text_bt"
+                                        >Select File</span
+                                    >
+                                </label>
+                            </div>
+                            <button class="smI" for="uploadSubmitip"> 
+                                Submit
+                            </button>-->
                         </div>
                     </div>
                     <div class="train_1">
@@ -275,20 +291,22 @@
                         </div>
                     </div>
                 </div>
+                <!-- ----------------------------------Row 2 ----------------------------------------- -->
 
                 <div class="col-lg-4 process_img">
-                    {% if file_url %}
-                    <p>Uploaded Image: {{ filename }}</p>
-                    <img
-                        id="img_prc"
-                        src="{{ file_url }}"
-                        alt="Uploaded Image" />
-                    {% else %}
-
-                    <p>No image uploaded yet.</p>
-                    {% endif %}
+                    <div class="progress">
+                        <div
+                            class="progress-bar progress-bar-striped bg-success"
+                            role="progressbar"
+                            aria-valuenow="0"
+                            aria-valuemin="0"
+                            aria-valuemax="100"></div>
+                    </div>
+                    <div id="targetLayer" style="display: none"></div>
                     <img id="displayedImage" src="" alt="Downloaded Image" />
                 </div>
+
+                <!-- ----------------------------------Row 3----------------------------------------- -->
 
                 <div class="col-lg-2 result">
                     <div class="train_1">
@@ -349,5 +367,44 @@
             </div>
             <!-- Copyright -->
         </div>
+        <script>
+            $(document).ready(function () {
+                $('#uploadImage').submit(function (event) {
+                    if ($('#uploadFile').val()) {
+                        event.preventDefault();
+                        $('#loader-icon').show();
+                        $('#targetLayer').hide();
+                        $(this).ajaxSubmit({
+                            target: '#targetLayer',
+                            beforeSubmit: function () {
+                                $('.progress-bar').width('50%');
+                            },
+                            uploadProgress: function (
+                                event,
+                                position,
+                                total,
+                                percentageComplete
+                            ) {
+                                $('.progress-bar').animate(
+                                    {
+                                        width: percentageComplete + '%',
+                                    },
+                                    {
+                                        duration: 1000,
+                                    }
+                                );
+                            },
+                            success: function (data) {
+                                $('#loader-icon').hide();
+                                $('#targetLayer').show();
+                                $('#targetLayer').append(data.htmlresponse);
+                            },
+                            resetForm: true,
+                        });
+                    }
+                    return false;
+                });
+            });
+        </script>
     </body>
 </html>
