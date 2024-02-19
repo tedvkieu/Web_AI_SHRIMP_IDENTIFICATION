@@ -1,45 +1,44 @@
-from flask import Flask, flash, request, redirect, url_for, render_template, jsonify
-import os
-from werkzeug.utils import secure_filename
-import urllib.request
+import pyrebase
 
-# the "files" directory next to the app.py file
-#UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files')
-#print(UPLOAD_FOLDER)
-UPLOAD_FOLDER = 'static/images/img_process'
- 
+from flask import Flask, session, redirect, request, render_template
+
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['SECRET_KEY'] = 'Sick Rat'
- 
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
- 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-  
-@app.route('/')
-def index(): 
-    return render_template('upload.html')
-  
-@app.route('/', methods=['POST'])
-def upload():
-    if 'uploadFile[]' not in request.files:
-        return redirect(request.url)
-    files = request.files.getlist('uploadFile[]')
-    file_names = []
-    for file in files:
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file_names.append(filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            msg  = 'File successfully uploaded to /static/uploads!'
-        else:
-            msg  = 'Invalid Uplaod only png, jpg, jpeg, gif'
-    return jsonify({'htmlresponse': render_template('response.html', msg=msg, filenames=file_names)})
- 
-def _get_files():
-    file_list = os.path.join(UPLOAD_FOLDER, 'files.json')
-    if os.path.exists(file_list):
-        with open(file_list) as fh:
-            return json.load(fh)
-    return {}
+
+
+config = {
+    "apiKey": "AIzaSyDtkGxX2RktdG225UIkckVWYp8DOpJ4yyk",
+    "authDomain": "fir-flask-login.firebaseapp.com",
+    "projectId": "fir-flask-login",
+    "storageBucket": "fir-flask-login.appspot.com",
+    "messagingSenderId": "793015206279",
+    "appId": "1:793015206279:web:debaf7f5bafe2c63ebd322",
+    "measurementId": "G-23RZ9QEL7V",
+    "databaseURL": ""
+}
+
+app.secret_key = "Kieune"
+firebase = pyrebase.initialize_app(config)
+auth = firebase.auth()
+
+@app.route('/', methods=['POST', 'GET'])
+def index():
+    if('user' in session):
+        return 'Hi, {}'.format(session['user'])
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        try:
+            user = auth.sign_in_with_email_and_password(email, password)
+            session['user'] = email
+        except:
+            return "failed to login"
+    return render_template('test.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('user')
+    return redirect('/')
+
+if __name__ == "__main__":
+    #app.run(debug=True)
+    app.run(port =1111)

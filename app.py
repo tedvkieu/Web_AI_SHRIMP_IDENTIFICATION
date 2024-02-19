@@ -1,5 +1,6 @@
 from flask import Flask, redirect, url_for,render_template, send_from_directory,request, send_file,jsonify, session, flash
 from flask_wtf import FlaskForm
+from authlib.integrations.flask_client import OAuth
 from wtforms import FileField, SubmitField
 from wtforms.validators import InputRequired
 from enum import EnumMeta
@@ -31,8 +32,10 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 #app.config['UPLOAD_FOLDER'] = 'static/images/img_process'
 app.permanent_session_lifetime = timedelta(minutes=1)
 
+oauth = OAuth(app)
 db = SQLAlchemy(app)
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif', 'mp4'])
+github = oauth.register('github', {...})
 
 class user(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -86,6 +89,17 @@ def _get_files():
 
     
 #/--------------------------------------------------------
+@app.route('/login_o')
+def login_o():
+    redirect_uri = url_for('authorize', _external=True)
+    return github.authorize_redirect(redirect_uri)
+
+@app.route('/authorize')
+def authorize():
+    token = github.authorize_access_token()
+    # you can save the token into database
+    profile = github.get('/user', token=token)
+    return jsonify(profile)
 
 @app.route("/login",methods=["GET", "POST"])
 def login():

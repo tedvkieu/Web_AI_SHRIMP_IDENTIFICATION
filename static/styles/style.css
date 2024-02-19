@@ -202,7 +202,11 @@ input[type='submit']:hover {
 .fa-link {
     margin-left: 10px;
 }
+#uploadSubmit {
+    font-size: 13px;
+}
 .input_file {
+    font-size: 13px;
     text-align: center;
     padding: 4px;
     border: 2px solid #ccc;
